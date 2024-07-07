@@ -32,8 +32,11 @@ class SMSForwarder:
         full_message = f"> {sms['body']}"
         numbers_str = ', '.join(numbers)
         message = f"Forwarded From: {sms['number']} at {sms['received']}\n\n{full_message}\n\n{numbers_str}"
-        
-        command = f'curl -H "Content-Type: application/json" -X POST -d \'{{"content": "{message}"}}\' {self.webhook_url}'
+
+        # Ensure the message is properly escaped for JSON
+        json_data = json.dumps({"content": message})
+
+        command = f'curl -H "Content-Type: application/json" -X POST -d \'{json_data}\' {self.webhook_url}'
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         print(f"[!] Discord Response: {result.stdout.strip()} {result.stderr.strip()}")
         return result
